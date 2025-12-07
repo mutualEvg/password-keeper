@@ -3,6 +3,7 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -387,16 +388,21 @@ func metadataToJSON(metadata map[string]string) interface{} {
 	if len(metadata) == 0 {
 		return nil
 	}
-	// PostgreSQL JSONB will handle the map directly
-	return metadata
+	jsonBytes, err := json.Marshal(metadata)
+	if err != nil {
+		return nil
+	}
+	return string(jsonBytes)
 }
 
 func jsonToMetadata(jsonStr string) map[string]string {
-	// For simplicity, we'll implement basic parsing
-	// In production, use encoding/json
 	if jsonStr == "" {
 		return make(map[string]string)
 	}
-	return make(map[string]string)
+	result := make(map[string]string)
+	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
+		return make(map[string]string)
+	}
+	return result
 }
 

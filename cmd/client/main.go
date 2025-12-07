@@ -21,8 +21,9 @@ var (
 	BuildDate = "unknown"
 
 	// Global flags
-	serverAddress string
-	gophClient    *client.Client
+	serverAddress  string
+	masterPassword string
+	gophClient     *client.Client
 )
 
 func main() {
@@ -55,6 +56,7 @@ func main() {
 
 	// Global flags
 	rootCmd.PersistentFlags().StringVarP(&serverAddress, "server", "s", "localhost:50051", "Server address")
+	rootCmd.PersistentFlags().StringVar(&masterPassword, "master-password", "", "Master password (or set GOPHKEEPER_MASTER_PASSWORD env var)")
 
 	// Add commands
 	rootCmd.AddCommand(versionCmd())
@@ -447,6 +449,15 @@ func syncCmd() *cobra.Command {
 // Helper functions
 
 func promptMasterPassword() string {
+	// Check flag first
+	if masterPassword != "" {
+		return masterPassword
+	}
+	// Check environment variable
+	if envPass := os.Getenv("GOPHKEEPER_MASTER_PASSWORD"); envPass != "" {
+		return envPass
+	}
+	// Prompt interactively
 	fmt.Print("Enter master password: ")
 	passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {

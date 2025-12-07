@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔐 GophKeeper Setup Script"
+echo "GophKeeper Setup Script"
 echo "=========================="
 echo ""
 
@@ -19,23 +19,23 @@ echo "Checking prerequisites..."
 
 # Check Go
 if ! command -v go &> /dev/null; then
-    echo "❌ Go is not installed. Please install Go 1.24 or higher."
+    echo "[ERROR] Go is not installed. Please install Go 1.24 or higher."
     exit 1
 fi
-echo "✅ Go $(go version | awk '{print $3}') found"
+echo "[OK] Go $(go version | awk '{print $3}') found"
 
 # Check PostgreSQL (optional)
 if command -v psql &> /dev/null; then
-    echo "✅ PostgreSQL found"
+    echo "[OK] PostgreSQL found"
 else
-    echo "⚠️  PostgreSQL not found in PATH (you can use Docker instead)"
+    echo "[WARN] PostgreSQL not found in PATH (you can use Docker instead)"
 fi
 
 # Check Docker (optional)
 if command -v docker &> /dev/null; then
-    echo "✅ Docker found"
+    echo "[OK] Docker found"
 else
-    echo "⚠️  Docker not found (optional for deployment)"
+    echo "[WARN] Docker not found (optional for deployment)"
 fi
 
 echo ""
@@ -43,7 +43,7 @@ echo "Setting up GophKeeper..."
 echo ""
 
 # Install dependencies
-echo "📦 Installing Go dependencies..."
+echo "Installing Go dependencies..."
 go mod download
 go mod tidy
 
@@ -51,14 +51,14 @@ go mod tidy
 mkdir -p bin
 
 # Build server and client
-echo "🔨 Building server..."
+echo "Building server..."
 go build -ldflags "-X 'main.Version=1.0.0' -X 'main.BuildDate=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'" -o bin/server cmd/server/main.go
 
-echo "🔨 Building client..."
+echo "Building client..."
 go build -ldflags "-X 'main.Version=1.0.0' -X 'main.BuildDate=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'" -o bin/client cmd/client/main.go
 
 echo ""
-echo "${GREEN}✅ Build successful!${NC}"
+echo "${GREEN}Build successful!${NC}"
 echo ""
 
 # Offer to start services
@@ -75,10 +75,10 @@ case $choice in
         if command -v docker-compose &> /dev/null; then
             docker-compose up -d
             echo ""
-            echo "${GREEN}✅ Services started!${NC}"
+            echo "${GREEN}Services started!${NC}"
             echo "Server is running on localhost:50051"
         else
-            echo "❌ docker-compose not found. Please install Docker Compose."
+            echo "[ERROR] docker-compose not found. Please install Docker Compose."
             exit 1
         fi
         ;;
@@ -105,7 +105,7 @@ case $choice in
 esac
 
 echo ""
-echo "📖 Quick Start Guide:"
+echo "Quick Start Guide:"
 echo "====================="
 echo ""
 echo "1. Register a new user:"
@@ -125,5 +125,4 @@ echo "   ${YELLOW}./bin/client get -n GitHub${NC}"
 echo ""
 echo "For more information, see README.md and PROJECT_SUMMARY.md"
 echo ""
-echo "${GREEN}Setup complete! 🎉${NC}"
-
+echo "${GREEN}Setup complete!${NC}"
