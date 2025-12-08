@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "github.com/ar11/gophkeeper/pkg/api/proto";
+
+// GophKeeper service definition
+service GophKeeper {
+  // User authentication
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  
+  // Data management
+  rpc AddItem(AddItemRequest) returns (AddItemResponse);
+  rpc GetItem(GetItemRequest) returns (GetItemResponse);
+  rpc ListItems(ListItemsRequest) returns (ListItemsResponse);
+  rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+  rpc DeleteItem(DeleteItemRequest) returns (DeleteItemResponse);
+  
+  // Synchronization
+  rpc Sync(SyncRequest) returns (SyncResponse);
+}
+
+// Authentication messages
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+  string token = 2;
+  string message = 3;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string user_id = 1;
+  string token = 2;
+  string message = 3;
+}
+
+// Data type enum
+enum DataType {
+  DATA_TYPE_UNSPECIFIED = 0;
+  DATA_TYPE_CREDENTIAL = 1;
+  DATA_TYPE_TEXT = 2;
+  DATA_TYPE_BINARY = 3;
+  DATA_TYPE_CARD = 4;
+}
+
+// Data item messages
+message DataItem {
+  string id = 1;
+  string user_id = 2;
+  DataType type = 3;
+  string name = 4;
+  bytes encrypted_data = 5;
+  map<string, string> metadata = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+  int64 version = 9;
+  bool deleted = 10;
+}
+
+message AddItemRequest {
+  string token = 1;
+  DataType type = 2;
+  string name = 3;
+  bytes encrypted_data = 4;
+  map<string, string> metadata = 5;
+}
+
+message AddItemResponse {
+  string item_id = 1;
+  string message = 2;
+}
+
+message GetItemRequest {
+  string token = 1;
+  string item_id = 2;
+  string name = 3; // Alternative to item_id
+}
+
+message GetItemResponse {
+  DataItem item = 1;
+}
+
+message ListItemsRequest {
+  string token = 1;
+  DataType type = 2; // Filter by type (optional)
+}
+
+message ListItemsResponse {
+  repeated DataItem items = 1;
+}
+
+message UpdateItemRequest {
+  string token = 1;
+  string item_id = 2;
+  bytes encrypted_data = 3;
+  map<string, string> metadata = 4;
+  int64 version = 5; // For conflict resolution
+}
+
+message UpdateItemResponse {
+  string message = 1;
+  int64 new_version = 2;
+}
+
+message DeleteItemRequest {
+  string token = 1;
+  string item_id = 2;
+}
+
+message DeleteItemResponse {
+  string message = 1;
+}
+
+// Synchronization messages
+message SyncRequest {
+  string token = 1;
+  int64 last_sync_timestamp = 2;
+  repeated DataItem client_items = 3;
+}
+
+message SyncResponse {
+  repeated DataItem items = 1;
+  int64 sync_timestamp = 2;
+  repeated ConflictItem conflicts = 3;
+}
+
+message ConflictItem {
+  DataItem server_version = 1;
+  DataItem client_version = 2;
+}
+
